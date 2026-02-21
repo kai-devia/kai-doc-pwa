@@ -5,27 +5,24 @@ Una ventana a la mente de Kai — visor y editor de archivos markdown de context
 ## Arquitectura
 
 ```
-                    ┌─────────────────┐
-                    │   Cloudflare    │
-                    │     Tunnel      │
-                    └────────┬────────┘
-                             │ :80
-                    ┌────────▼────────┐
-                    │     Traefik     │
-                    │  Reverse Proxy  │
-                    └────────┬────────┘
-                             │
-              ┌──────────────┼──────────────┐
-              │              │              │
-     ┌────────▼──────┐      ...      (futuros proyectos)
-     │  kai-doc-pwa  │
-     │    :3001      │
-     └───────────────┘
+┌────────────────────────────────────────┐
+│            kai-doc-pwa                 │
+│  ┌──────────────────────────────────┐  │
+│  │     React Frontend (built)       │  │
+│  ├──────────────────────────────────┤  │
+│  │        Express Backend           │  │
+│  │   - REST API (/api/*)            │  │
+│  │   - WebSocket (live updates)     │  │
+│  │   - Static file serving          │  │
+│  └──────────────────────────────────┘  │
+│              ↕ volume                   │
+│     /home/kai/.openclaw/workspace      │
+└─────────────────┬──────────────────────┘
+                  │ :80
+            ┌─────▼─────┐
+            │  Docker   │
+            └───────────┘
 ```
-
-- **Traefik** — Reverse proxy con descubrimiento automático vía Docker
-- **Docker** — Cada proyecto en su contenedor, red compartida `proxy`
-- **Cloudflare Tunnel** — Acceso externo seguro sin abrir puertos
 
 ## Stack Tecnológico
 
@@ -46,23 +43,19 @@ Una ventana a la mente de Kai — visor y editor de archivos markdown de context
 - Docker & Docker Compose
 - Node.js 18+ (solo para desarrollo local)
 
-## Instalación Rápida
+## Instalación Rápida (Docker)
 
-### 1. Clonar el repositorio
 ```bash
+# Clonar
 git clone git@github.com:kai-devia/kai-doc-pwa.git
 cd kai-doc-pwa
-```
 
-### 2. Levantar todo (Traefik + App)
-```bash
-chmod +x start.sh
-./start.sh
-```
+# Levantar
+docker compose up -d --build
 
-### 3. Acceder
-- **Local:** http://localhost
-- **Traefik Dashboard:** http://localhost:8080
+# Acceder
+open http://localhost
+```
 
 ## Credenciales por defecto
 
@@ -74,6 +67,7 @@ chmod +x start.sh
 ### Backend
 ```bash
 cd backend
+cp .env.example .env  # editar con tus valores
 npm install
 npm run dev
 ```
@@ -99,44 +93,30 @@ Acceder a http://localhost:5173
 
 ## Cloudflare Tunnel (acceso externo)
 
+Instalar cloudflared si no está:
 ```bash
-cd /home/kai/infrastructure/traefik
-./start-tunnel.sh
+# Ubuntu/Debian
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared
+chmod +x /usr/local/bin/cloudflared
+```
+
+Abrir tunnel:
+```bash
+cloudflared tunnel --url http://localhost:80
 ```
 
 Esto abrirá un túnel temporal con una URL pública tipo `https://xxx.trycloudflare.com`
 
-## Añadir Proyectos Futuros
+## Funcionalidades
 
-Para añadir un nuevo proyecto a la misma infraestructura:
-
-1. Crear `docker-compose.yml` en el proyecto:
-```yaml
-version: "3.8"
-
-networks:
-  proxy:
-    external: true
-
-services:
-  mi-proyecto:
-    build: .
-    container_name: mi-proyecto
-    restart: unless-stopped
-    networks:
-      - proxy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.mi-proyecto.rule=PathPrefix(`/mi-ruta`)"
-      - "traefik.http.services.mi-proyecto.loadbalancer.server.port=3000"
-```
-
-2. Levantar:
-```bash
-docker compose up -d
-```
-
-Traefik lo detectará automáticamente.
+- 🔐 **Autenticación JWT** con expiración de 7 días
+- 📁 **Árbol de archivos** navegable con búsqueda
+- 📄 **Dashboard** con cards y preview de cada archivo
+- 📝 **Vista markdown** con soporte GFM (tablas, código, etc.)
+- ✏️ **Editor** con guardado directo
+- 🔴 **Live updates** vía WebSocket cuando cambian archivos
+- 📱 **Responsive** — funciona en móvil con sidebar drawer
+- 🌐 **PWA** — instalable como app
 
 ## Estructura de Carpetas
 
@@ -164,17 +144,29 @@ kai-doc-pwa/
 │   └── vite.config.js
 ├── Dockerfile             # Multi-stage build
 ├── docker-compose.yml     # Configuración Docker
-├── start.sh               # Script de arranque
 └── README.md
 ```
 
-## Infraestructura Compartida
+## API Endpoints
 
 ```
-/home/kai/infrastructure/traefik/
-├── docker-compose.yml     # Servicio Traefik
-├── traefik.yml            # Configuración Traefik
-└── start-tunnel.sh        # Script Cloudflare Tunnel
+POST /api/auth/login
+  body: { user, password }
+  res:  { token }
+
+GET /api/files
+  header: Authorization: Bearer <token>
+  res: árbol de archivos .md como JSON
+
+GET /api/files/content?path=MEMORY.md
+  res: { content, mtime }
+
+PUT /api/files/content?path=MEMORY.md
+  body: { content }
+  res: { ok: true }
+
+WS /ws?token=<jwt>
+  → { type: "file_changed", path: "..." }
 ```
 
 ## Licencia

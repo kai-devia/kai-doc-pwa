@@ -48,8 +48,16 @@
 - Volume para workspace montado en /workspace
 - Script start.sh para levantar todo
 
-## Próximo paso
-- Crear repositorio en GitHub
-- Commits incrementales por feature
-- Build y test de Docker
-- Notificar a Guille
+## [2026-02-21 09:46 UTC] Docker build
+- Traefik v3/v2 incompatible con Docker Engine 29 (API mismatch)
+- Solución: exponer kai-doc-pwa directamente en puerto 80 sin Traefik
+- Build multi-stage exitoso
+- Todos los endpoints funcionando
+
+## [2026-02-21 09:47 UTC] ✅ COMPLETADO
+- App corriendo en http://localhost
+- Login, file tree, dashboard, viewer, editor funcionando
+- WebSocket live updates activo
+- PWA configurada
+- README actualizado
+- Repositorio: https://github.com/kai-devia/kai-doc-pwa
