@@ -45,6 +45,29 @@
   color: var(--text-primary);
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.biometricBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  line-height: 1;
+}
+
+.biometricBtn:hover {
+  border-color: var(--accent);
+  background: var(--bg-base);
+}
+
 @media (max-width: 768px) {
   .menuButton {
     display: flex;
