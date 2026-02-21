@@ -96,8 +96,16 @@ export default function Chat() {
     if (busyRef.current || queueRef.current.length === 0) return;
 
     busyRef.current = true;
-    const text = queueRef.current.shift();
-    setPending(queueRef.current.length);
+
+    // Combinar todos los mensajes pendientes en una sola request
+    // Si el usuario envió una corrección mientras pensaba, se analiza todo junto
+    const pending = [...queueRef.current];
+    queueRef.current = [];
+    setPending(0);
+
+    const text = pending.length === 1
+      ? pending[0]
+      : pending.join('\n\n'); // combinar con separación clara
 
     setStreaming(true);
     setStreamText('');
