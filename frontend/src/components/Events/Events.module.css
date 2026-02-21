@@ -1,0 +1,371 @@
+/* ─── Panel wrapper ──────────────────────────────────────────────────────── */
+.panelWrapper {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--header-height) - 48px);
+  overflow: hidden;
+  gap: 16px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.panelTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.newBtn {
+  padding: 8px 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.newBtn:hover {
+  background: var(--accent-hover);
+}
+
+/* ─── Table ──────────────────────────────────────────────────────────────── */
+.tableWrapper {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table th {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background: var(--bg-card);
+}
+
+.table td {
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+
+.tdName {
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.eventName {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.eventDesc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.tdMeta {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.tdActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ─── Badges ─────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+/* ─── Action buttons ─────────────────────────────────────────────────────── */
+.editBtn,
+.deleteBtn {
+  padding: 5px 9px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: var(--transition);
+}
+
+.editBtn:hover {
+  border-color: var(--warning);
+  background: var(--warning)11;
+}
+
+.deleteBtn:hover {
+  border-color: var(--danger);
+  background: var(--danger)11;
+}
+
+/* ─── Empty state ────────────────────────────────────────────────────────── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+}
+
+/* ─── Modal ──────────────────────────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.modalHeader h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  transition: var(--transition);
+}
+
+.closeBtn:hover {
+  color: var(--danger);
+  background: var(--danger)11;
+}
+
+.modalForm {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.formGroup label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  transition: border-color var(--transition);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.formGroup select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+.formRow {
+  display: flex;
+  gap: 12px;
+}
+
+.formError {
+  background: var(--danger)22;
+  border: 1px solid var(--danger)44;
+  color: var(--danger);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.cancelBtn {
+  padding: 9px 20px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.cancelBtn:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+.saveBtn {
+  padding: 9px 24px;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.saveBtn:hover {
+  background: var(--accent-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Utility ────────────────────────────────────────────────────────────── */
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 100%;
+  color: var(--text-secondary);
+}
+
+.errorText {
+  color: var(--danger);
+  font-size: 0.95rem;
+}
+
+.retryBtn {
+  padding: 8px 20px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

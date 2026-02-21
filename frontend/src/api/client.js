@@ -113,3 +113,60 @@ export async function saveFileContent(path, content) {
 export function isAuthenticated() {
   return !!getToken();
 }
+
+// ─── Tasks API ───────────────────────────────────────────────────────────────
+
+export async function getTasks(status) {
+  const qs = status ? `?status=${encodeURIComponent(status)}` : '';
+  return request(`/tasks${qs}`);
+}
+
+export async function getTask(id) {
+  return request(`/tasks/${id}`);
+}
+
+export async function createTask(data) {
+  return request('/tasks', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateTask(id, data) {
+  return request(`/tasks/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteTask(id) {
+  return request(`/tasks/${id}`, { method: 'DELETE' });
+}
+
+// ─── Events API ──────────────────────────────────────────────────────────────
+
+export async function getEvents() {
+  return request('/events');
+}
+
+export async function getEvent(id) {
+  return request(`/events/${id}`);
+}
+
+export async function createEvent(data) {
+  return request('/events', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateEvent(id, data) {
+  return request(`/events/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteEvent(id) {
+  return request(`/events/${id}`, { method: 'DELETE' });
+}

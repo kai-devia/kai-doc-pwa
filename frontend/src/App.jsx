@@ -5,6 +5,8 @@ import Layout from './components/Layout/Layout';
 import Dashboard from './components/Dashboard/Dashboard';
 import MarkdownView from './components/MarkdownView/MarkdownView';
 import Editor from './components/Editor/Editor';
+import TasksBoard from './components/Tasks/TasksBoard';
+import EventsPanel from './components/Events/EventsPanel';
 
 function ProtectedRoute({ children }) {
   if (!isAuthenticated()) {
@@ -42,6 +44,8 @@ export default function App() {
         <Route index element={<Dashboard />} />
         <Route path="file/*" element={<MarkdownView />} />
         <Route path="edit/*" element={<Editor />} />
+        <Route path="tasks" element={<TasksBoard />} />
+        <Route path="events" element={<EventsPanel />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

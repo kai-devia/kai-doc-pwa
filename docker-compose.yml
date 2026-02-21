@@ -11,6 +11,7 @@ services:
       - "80:3001"
     volumes:
       - /home/kai/.openclaw/workspace:/workspace:rw
+      - /home/kai/projects/kai-doc-pwa/data:/app/data:rw
     environment:
       - WORKSPACE_ROOT=/workspace
       - JWT_SECRET=kai-doc-pwa-secret-2026

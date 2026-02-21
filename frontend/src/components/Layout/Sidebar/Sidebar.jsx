@@ -28,6 +28,11 @@ export default function Sidebar({ tree, isOpen, onClose, onLogout }) {
     onClose?.();
   };
 
+  const handleNav = (path) => {
+    navigate(path);
+    onClose?.();
+  };
+
   return (
     <>
       {isOpen && <div className={styles.overlay} onClick={onClose} />}
@@ -35,6 +40,12 @@ export default function Sidebar({ tree, isOpen, onClose, onLogout }) {
         <div className={styles.top}>
           <button className={styles.dashboardBtn} onClick={handleDashboard}>
             🏠 Dashboard
+          </button>
+          <button className={styles.dashboardBtn} onClick={() => handleNav('/tasks')}>
+            📋 Tareas
+          </button>
+          <button className={styles.dashboardBtn} onClick={() => handleNav('/events')}>
+            ⚡ Eventos
           </button>
           <SearchBar value={search} onChange={setSearch} />
         </div>

@@ -1,0 +1,477 @@
+/* ─── Board wrapper ──────────────────────────────────────────────────────── */
+.boardWrapper {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--header-height) - 48px);
+  overflow: hidden;
+  gap: 16px;
+}
+
+.boardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.boardTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.newBtn {
+  padding: 8px 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.newBtn:hover {
+  background: var(--accent-hover);
+}
+
+/* ─── Kanban Board ───────────────────────────────────────────────────────── */
+.board {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex: 1;
+  padding-bottom: 8px;
+}
+
+.board::-webkit-scrollbar {
+  height: 6px;
+}
+.board::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+.board::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* ─── Column ────────────────────────────────────────────────────────────── */
+.column {
+  min-width: 260px;
+  max-width: 260px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.columnHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-top: 3px solid transparent;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+.columnTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.columnCount {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  min-width: 22px;
+  text-align: center;
+}
+
+.columnCards {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.columnCards::-webkit-scrollbar {
+  width: 4px;
+}
+.columnCards::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.newTaskBtn {
+  margin: 8px 10px 10px;
+  padding: 8px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.newTaskBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent)11;
+}
+
+/* ─── Task Card ──────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color var(--transition);
+}
+
+.card:hover {
+  border-color: var(--accent);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  flex: 1;
+}
+
+.projectTag {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  background: var(--accent)22;
+  color: var(--accent);
+  border: 1px solid var(--accent)44;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cardDesc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+}
+
+.cardBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.badgeNeutral {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.cardAssignee {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.cardDates {
+  display: flex;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.cardActions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.moveBtn {
+  flex: 1;
+  padding: 5px 8px;
+  background: var(--accent)22;
+  border: 1px solid var(--accent)55;
+  color: var(--accent);
+  border-radius: var(--radius);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.moveBtn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.editBtn,
+.deleteBtn {
+  padding: 5px 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: var(--transition);
+}
+
+.editBtn:hover {
+  border-color: var(--warning);
+  background: var(--warning)11;
+}
+
+.deleteBtn:hover {
+  border-color: var(--danger);
+  background: var(--danger)11;
+}
+
+/* ─── Modal ──────────────────────────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.modalHeader h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  transition: var(--transition);
+}
+
+.closeBtn:hover {
+  color: var(--danger);
+  background: var(--danger)11;
+}
+
+.modalForm {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.formGroup label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  transition: border-color var(--transition);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.formGroup select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+.formRow {
+  display: flex;
+  gap: 12px;
+}
+
+.formError {
+  background: var(--danger)22;
+  border: 1px solid var(--danger)44;
+  color: var(--danger);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.cancelBtn {
+  padding: 9px 20px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.cancelBtn:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+.saveBtn {
+  padding: 9px 24px;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.saveBtn:hover {
+  background: var(--accent-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Utility ────────────────────────────────────────────────────────────── */
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 100%;
+  color: var(--text-secondary);
+}
+
+.errorText {
+  color: var(--danger);
+  font-size: 0.95rem;
+}
+
+.retryBtn {
+  padding: 8px 20px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
