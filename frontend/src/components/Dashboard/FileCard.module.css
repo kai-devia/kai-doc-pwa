@@ -4,13 +4,16 @@
   border-radius: var(--radius-lg);
   padding: 20px;
   cursor: pointer;
+  overflow: hidden;
+  min-width: 0;
+  box-sizing: border-box;
   transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
 .card:hover {
   transform: translateY(-2px);
   border-color: var(--accent);
-  box-shadow: 0 8px 24px rgba(124, 106, 247, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 212, 170, 0.15);
 }
 
 .header {

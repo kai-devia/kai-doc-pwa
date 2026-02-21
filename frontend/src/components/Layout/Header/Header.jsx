@@ -12,7 +12,7 @@ export default function Header({ isConnected, onLogout }) {
       {/* KAI title — only visible on mobile (desktop uses NavSidebar logo) */}
       <div className={styles.title}>
         <img src="/kai-avatar.svg" alt="KAI" className={styles.logo} width="24" height="24" />
-        <span className={styles.text}>KAI</span>
+        <span className={styles.text}>Kai Devia</span>
       </div>
 
       <div className={styles.actions}>
