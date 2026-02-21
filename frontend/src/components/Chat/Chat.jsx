@@ -231,7 +231,6 @@ export default function Chat() {
           onKeyDown={handleKeyDown}
           placeholder="Escribe un mensaje..."
           rows={1}
-          {/* No deshabilitar — disabled cierra el teclado en móvil */}
         />
         <button
           className={styles.sendBtn}
