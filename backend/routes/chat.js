@@ -21,6 +21,52 @@ const SESSION_USER   = 'kai-doc-pwa'; // stable session key via OpenClaw user fi
 const WHISPER_HOST = process.env.WHISPER_HOST || '172.19.0.1';
 const WHISPER_PORT = process.env.WHISPER_PORT || 9876;
 
+// ── System Prompt — built dynamically on each request ────────────────────
+// Reads workspace files fresh each time so MEMORY.md changes are reflected immediately
+function buildSystemPrompt() {
+  const WORKSPACE = '/workspace';
+  const read = (f) => { try { return fs.readFileSync(path.join(WORKSPACE, f), 'utf8'); } catch { return ''; } };
+
+  const soul     = read('SOUL.md');
+  const identity = read('IDENTITY.md');
+  const user     = read('USER.md');
+  const memory   = read('MEMORY.md');
+  const agents   = read('AGENTS.md');
+
+  // Today's daily notes for recency
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const dailyToday = read(`memory/${today}.md`);
+  const dailyYesterday = read(`memory/${yesterday}.md`);
+
+  const dailyContext = [
+    dailyToday     ? `## Notas de hoy (${today})\n${dailyToday}`     : '',
+    dailyYesterday ? `## Notas de ayer (${yesterday})\n${dailyYesterday}` : '',
+  ].filter(Boolean).join('\n\n');
+
+  return `${identity}
+
+${soul}
+
+${user}
+
+## Long-term Memory & Context
+${memory}
+
+${dailyContext}
+
+## Rules & Workspace Instructions
+${agents}
+
+## Interface
+Estás respondiendo desde la Kai PWA (http://localhost) — interfaz web directa con Guille.
+Mismo comportamiento, misma personalidad, mismo contexto que en Telegram.
+Responde siempre en español salvo que Guille cambie el idioma.
+Tienes acceso completo a herramientas: exec, read, write, browser, etc.`;
+}
+
+console.log('[chat] system prompt will be built dynamically per request');
+
 // ── GET /api/chat/history ─────────────────────────────────────────────────
 router.get('/history', (req, res) => {
   try {
@@ -45,10 +91,25 @@ router.delete('/history', (req, res) => {
 });
 
 // ── Helper: Stream message to OpenClaw via SSE ──────────────────────────
-async function streamToOpenClaw(message, res) {
+async function streamToOpenClaw(message, res, history = []) {
+  // System prompt built fresh each request — reflects latest MEMORY.md, daily notes, etc.
+  const systemPrompt = buildSystemPrompt();
+
+  // Build messages array: system + history + current user message
+  const historyMessages = history.map(m => ({
+    role: m.role,
+    content: m.content,
+  }));
+
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...historyMessages,
+    { role: 'user', content: message },
+  ];
+
   const body = JSON.stringify({
-    model: 'openclaw:main',
-    messages: [{ role: 'user', content: message }],
+    model: 'openclaw',
+    messages,
     stream: true,
     user: SESSION_USER,
   });
@@ -62,7 +123,7 @@ async function streamToOpenClaw(message, res) {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(body),
       'Authorization': `Bearer ${OPENCLAW_TOKEN}`,
-      'x-openclaw-agent-id': 'main',
+      'x-openclaw-agent-id': 'pwa',
     },
   };
 
@@ -139,6 +200,11 @@ router.post('/send', async (req, res) => {
     return res.status(400).json({ error: 'message required' });
   }
 
+  // Load recent conversation history (last 40 messages = 20 turns) before saving current
+  const history = db.prepare(
+    'SELECT role, content FROM chat_messages ORDER BY id DESC LIMIT 40'
+  ).all().reverse();
+
   // Save user message
   const userMsg = db.prepare(
     "INSERT INTO chat_messages (role, content) VALUES ('user', ?) RETURNING *"
@@ -154,9 +220,9 @@ router.post('/send', async (req, res) => {
   // Emit user message id so client can render it immediately
   res.write(`data: ${JSON.stringify({ type: 'user_message', message: userMsg })}\n\n`);
 
-  // Stream response from OpenClaw
+  // Stream response from OpenClaw (with history for conversational context)
   try {
-    await streamToOpenClaw(message.trim(), res);
+    await streamToOpenClaw(message.trim(), res, history);
   } catch (err) {
     console.error('Error streaming response:', err);
   }
@@ -221,6 +287,11 @@ router.post('/send-audio', upload.single('audio'), async (req, res) => {
     return res.status(400).json({ error: 'No se detectó audio en la grabación' });
   }
 
+  // Load recent conversation history before saving current
+  const history = db.prepare(
+    'SELECT role, content FROM chat_messages ORDER BY id DESC LIMIT 40'
+  ).all().reverse();
+
   // Save user message with transcript
   const userMsg = db.prepare(
     "INSERT INTO chat_messages (role, content) VALUES ('user', ?) RETURNING *"
@@ -239,9 +310,9 @@ router.post('/send-audio', upload.single('audio'), async (req, res) => {
   // Emit user message id
   res.write(`data: ${JSON.stringify({ type: 'user_message', message: userMsg })}\n\n`);
 
-  // Stream response from OpenClaw
+  // Stream response from OpenClaw (with history for conversational context)
   try {
-    await streamToOpenClaw(transcript.trim(), res);
+    await streamToOpenClaw(transcript.trim(), res, history);
   } catch (err) {
     console.error('Error streaming response:', err);
   }
