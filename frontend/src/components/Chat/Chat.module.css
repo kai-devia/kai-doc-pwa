@@ -190,18 +190,36 @@
 
 .sendBtn {
   flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
   background: var(--accent);
   border: none;
-  border-radius: 20px;
-  padding: 10px 20px;
-  font-size: 0.88rem;
-  font-weight: 700;
   color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: background var(--transition), opacity var(--transition);
 }
 .sendBtn:hover:not(:disabled) { background: var(--accent-hover); }
-.sendBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.sendBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Puntos animados mientras streaming */
+.sendDots {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+.sendDots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #000;
+  animation: bounce 1.2s ease-in-out infinite;
+}
+.sendDots span:nth-child(2) { animation-delay: 0.2s; }
+.sendDots span:nth-child(3) { animation-delay: 0.4s; }
 
 /* ── Error banner ────────────────────────────────────────────────────────── */
 .errorBanner {

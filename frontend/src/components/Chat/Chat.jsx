@@ -102,6 +102,11 @@ export default function Chat() {
     setStreamingText('');
     setError(null);
 
+    // Mantener el foco en el input después de enviar (fix mobile)
+    setTimeout(() => {
+      if (inputRef.current) inputRef.current.focus();
+    }, 0);
+
     const token = getToken();
 
     try {
@@ -236,10 +241,17 @@ export default function Chat() {
         />
         <button
           className={styles.sendBtn}
+          onPointerDown={(e) => e.preventDefault()} /* evita que el botón robe el foco */
           onClick={sendMessage}
           disabled={!input.trim() || streaming}
+          aria-label="Enviar"
         >
-          {streaming ? '...' : 'Enviar'}
+          {streaming
+            ? <span className={styles.sendDots}><span/><span/><span/></span>
+            : <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+              </svg>
+          }
         </button>
       </div>
     </div>
