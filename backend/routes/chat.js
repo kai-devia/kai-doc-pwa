@@ -92,7 +92,7 @@ router.delete('/history', (req, res) => {
 });
 
 // ── Helper: Stream message to OpenClaw via SSE ──────────────────────────
-async function streamToOpenClaw(message, res, history = []) {
+async function streamToOpenClaw(message, res, history = [], sessionUser = SESSION_USER) {
   // System prompt built fresh each request — reflects latest MEMORY.md, daily notes, etc.
   const systemPrompt = buildSystemPrompt();
 
@@ -112,7 +112,7 @@ async function streamToOpenClaw(message, res, history = []) {
     model: 'openclaw',
     messages,
     stream: true,
-    user: SESSION_USER,
+    user: sessionUser,
   });
 
   const options = {
@@ -334,7 +334,6 @@ router.post('/send-image', upload.single('image'), async (req, res) => {
   }
 
   const caption = (req.body.message || '').trim();
-  const base64 = req.file.buffer.toString('base64');
   const mediaType = req.file.mimetype || 'image/jpeg';
 
   // Validate image mime type
@@ -342,6 +341,10 @@ router.post('/send-image', upload.single('image'), async (req, res) => {
   if (!validTypes.includes(mediaType)) {
     return res.status(400).json({ error: `Tipo de imagen no soportado: ${mediaType}` });
   }
+
+  // Encode image as base64 for vision API (no temp files, no tool calling required)
+  const base64Image = req.file.buffer.toString('base64');
+  const imageDataUrl = `data:${mediaType};base64,${base64Image}`;
 
   // The text stored in DB (no binary data)
   const dbContent = caption ? `[Imagen] ${caption}` : '[Imagen]';
@@ -368,23 +371,21 @@ router.post('/send-image', upload.single('image'), async (req, res) => {
   // Emit user message id so client can map the optimistic message
   res.write(`data: ${JSON.stringify({ type: 'user_message', message: userMsg })}\n\n`);
 
-  // Build multimodal content — OpenAI vision format (data URL)
-  // OpenClaw uses the OpenAI-compatible endpoint, so we use image_url not Anthropic's source format
-  const imageContent = [
+  // Build multimodal content array — Claude vision API (base64, no tool calling needed)
+  const userContent = [
     {
       type: 'image_url',
-      image_url: { url: `data:${mediaType};base64,${base64}` },
+      image_url: { url: imageDataUrl },
+    },
+    {
+      type: 'text',
+      text: caption || 'Describe esta imagen en detalle.',
     },
   ];
-  if (caption) {
-    imageContent.push({ type: 'text', text: caption });
-  } else {
-    imageContent.push({ type: 'text', text: 'Describe esta imagen en detalle.' });
-  }
 
-  // Stream vision response
+  // Stream vision response via multimodal content
   try {
-    await streamWithContent(imageContent, res, history);
+    await streamWithContent(userContent, res, history);
   } catch (err) {
     console.error('Error streaming image response:', err);
   }
