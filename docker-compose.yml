@@ -1,0 +1,25 @@
+version: "3.8"
+
+networks:
+  proxy:
+    external: true
+
+services:
+  kai-doc-pwa:
+    build: .
+    container_name: kai-doc-pwa
+    restart: unless-stopped
+    networks:
+      - proxy
+    volumes:
+      - /home/kai/.openclaw/workspace:/workspace:rw
+    environment:
+      - WORKSPACE_ROOT=/workspace
+      - JWT_SECRET=kai-doc-pwa-secret-2026
+      - AUTH_USER=guille
+      - AUTH_PASS=erythia2026
+      - PORT=3001
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kai-doc.rule=PathPrefix(`/`)"
+      - "traefik.http.services.kai-doc.loadbalancer.server.port=3001"
