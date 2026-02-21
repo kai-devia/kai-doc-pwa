@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth');
 const filesRoutes = require('./routes/files');
 const tasksRoutes = require('./routes/tasks');
 const eventsRoutes = require('./routes/events');
+const webauthnRoutes = require('./routes/webauthn');
 
 // Initialize SQLite database (creates tables + seed data on first run)
 require('./db');
@@ -25,6 +26,7 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/auth/webauthn', webauthnRoutes);
 app.use('/api/files', filesRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/events', eventsRoutes);

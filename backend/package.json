@@ -8,6 +8,7 @@
     "dev": "node --watch index.js"
   },
   "dependencies": {
+    "@simplewebauthn/server": "^8.3.5",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^9.4.3",
     "chokidar": "^3.5.3",
