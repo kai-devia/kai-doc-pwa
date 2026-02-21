@@ -4,7 +4,6 @@ import { marked } from 'marked';
 import styles from './Chat.module.css';
 
 const API_BASE = '/api';
-
 marked.setOptions({ breaks: true, gfm: true });
 
 // ── Sub-components ────────────────────────────────────────────────────────
@@ -14,9 +13,7 @@ function TypingIndicator() {
     <div className={`${styles.msgRow} ${styles.msgRowAssistant}`}>
       <div className={styles.avatar}>K</div>
       <div className={`${styles.bubble} ${styles.bubbleAssistant}`}>
-        <div className={styles.typing}>
-          <span /><span /><span />
-        </div>
+        <div className={styles.typing}><span /><span /><span /></div>
       </div>
     </div>
   );
@@ -31,18 +28,15 @@ function Message({ msg, isStreaming }) {
         <div className={styles.bubbleText}>
           {isUser
             ? msg.content
-            : <div
-                className={styles.markdownContent}
-                dangerouslySetInnerHTML={{ __html: marked.parse(msg.content) }}
-              />
+            : <div className={styles.markdownContent}
+                dangerouslySetInnerHTML={{ __html: marked.parse(msg.content) }} />
           }
           {isStreaming && <span className={styles.cursor} />}
         </div>
         {msg.created_at && (
           <div className={styles.bubbleTime}>
             {new Date(msg.created_at + 'Z').toLocaleTimeString('es-ES', {
-              hour: '2-digit',
-              minute: '2-digit',
+              hour: '2-digit', minute: '2-digit',
             })}
           </div>
         )}
@@ -54,70 +48,56 @@ function Message({ msg, isStreaming }) {
 // ── Main component ────────────────────────────────────────────────────────
 
 export default function Chat() {
-  const [messages, setMessages]         = useState([]);
-  const [input, setInput]               = useState('');
-  const [loading, setLoading]           = useState(true);
-  const [streaming, setStreaming]       = useState(false);
-  const [streamingText, setStreamingText] = useState('');
-  const [error, setError]               = useState(null);
-  const [queueLength, setQueueLength]   = useState(0);
+  const [messages,     setMessages]     = useState([]);
+  const [input,        setInput]        = useState('');
+  const [loading,      setLoading]      = useState(true);
+  const [streaming,    setStreaming]     = useState(false);
+  const [streamText,   setStreamText]   = useState('');
+  const [error,        setError]        = useState(null);
+  const [pending,      setPending]      = useState(0); // mensajes en cola
 
   const bottomRef  = useRef(null);
   const inputRef   = useRef(null);
-  const queueRef   = useRef([]);
-  const processingRef = useRef(false);
+  const queueRef   = useRef([]);     // cola de mensajes pendientes
+  const busyRef    = useRef(false);  // true mientras procesa un mensaje
 
+  // ── Scroll ──────────────────────────────────────────────────────────────
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  // Load history on mount
+  useEffect(() => { scrollToBottom(); }, [messages.length, streaming, streamText, scrollToBottom]);
+
+  // ── Load history ─────────────────────────────────────────────────────────
   useEffect(() => {
-    const token = getToken();
-    fetch(`${API_BASE}/chat/history`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_BASE}/chat/history`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    })
       .then(r => r.json())
       .then(data => {
         setMessages(Array.isArray(data) ? data : []);
         setLoading(false);
-        // Instant scroll on first load (no animation)
         setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'instant' }), 50);
       })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+      .catch(err => { setError(err.message); setLoading(false); });
+  }, []); // eslint-disable-line
 
-  // Scroll to bottom whenever messages or streaming state changes
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages.length, streaming, streamingText, scrollToBottom]);
+  // ── Process one message from queue ───────────────────────────────────────
+  const processNext = useCallback(async () => {
+    if (busyRef.current || queueRef.current.length === 0) return;
 
-  // Process queue whenever it has items and we're not processing
-  useEffect(() => {
-    if (!processingRef.current && queueRef.current.length > 0) {
-      processQueue();
-    }
-  }, [queueLength, processQueue]);
-
-  // Process queue of pending messages
-  const processQueue = useCallback(async () => {
-    if (processingRef.current || queueRef.current.length === 0) return;
-
-    processingRef.current = true;
+    busyRef.current = true;
     const text = queueRef.current.shift();
-    setQueueLength(queueRef.current.length);
+    setPending(queueRef.current.length);
 
     setStreaming(true);
-    setStreamingText('');
+    setStreamText('');
     setError(null);
-
-    const token = getToken();
 
     try {
       const res = await fetch(`${API_BASE}/chat/send`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify({ message: text }),
       });
 
@@ -125,80 +105,61 @@ export default function Chat() {
 
       const reader  = res.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = '';
-      let accumulated = '';
+      let buf = '', accumulated = '';
 
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop(); // keep incomplete line
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop();
 
         for (const line of lines) {
           if (!line.startsWith('data:')) continue;
-          const raw = line.slice(5).trim();
+          let ev;
+          try { ev = JSON.parse(line.slice(5).trim()); } catch { continue; }
 
-          let event;
-          try { event = JSON.parse(raw); } catch { continue; }
-
-          if (event.type === 'user_message') {
-            setMessages(prev => [...prev, event.message]);
-          } else if (event.type === 'delta') {
-            accumulated += event.content;
-            setStreamingText(accumulated);
-          } else if (event.type === 'done') {
-            setMessages(prev => [...prev, event.message]);
-            setStreamingText('');
+          if (ev.type === 'user_message') {
+            setMessages(prev => [...prev, ev.message]);
+          } else if (ev.type === 'delta') {
+            accumulated += ev.content;
+            setStreamText(accumulated);
+          } else if (ev.type === 'done') {
+            setMessages(prev => [...prev, ev.message]);
+            setStreamText('');
             setStreaming(false);
-          } else if (event.type === 'error') {
-            throw new Error(event.error);
+          } else if (ev.type === 'error') {
+            throw new Error(ev.error);
           }
         }
       }
     } catch (err) {
       setError(err.message);
       setStreaming(false);
-      setStreamingText('');
-    } finally {
-      processingRef.current = false;
-      // Process next in queue
-      if (queueRef.current.length > 0) {
-        setTimeout(() => processQueue(), 0);
-      }
+      setStreamText('');
     }
-  }, []);
 
-  // Send a message — adds to queue
-  const sendMessage = useCallback(async () => {
+    busyRef.current = false;
+    // Procesar el siguiente si hay cola
+    if (queueRef.current.length > 0) processNext();
+  }, []); // eslint-disable-line
+
+  // ── Send: encola el mensaje y arranca el procesador si está libre ─────────
+  const sendMessage = useCallback(() => {
     const text = input.trim();
     if (!text) return;
 
     setInput('');
-    // Reset textarea height
     if (inputRef.current) inputRef.current.style.height = 'auto';
 
-    // Add to queue
     queueRef.current.push(text);
-    setQueueLength(queueRef.current.length);
+    setPending(queueRef.current.length);
+    processNext();
+  }, [input, processNext]);
 
-    // Keep focus on input
-    setTimeout(() => {
-      if (inputRef.current) inputRef.current.focus();
-    }, 0);
-
-    // Process queue if not already processing
-    if (!processingRef.current) {
-      processQueue();
-    }
-  }, [input, processQueue]);
-
+  // ── Keyboard handlers ─────────────────────────────────────────────────────
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   const handleInputChange = (e) => {
@@ -207,26 +168,25 @@ export default function Chat() {
     e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
   };
 
+  // ── Clear history ─────────────────────────────────────────────────────────
   const clearHistory = async () => {
     if (!window.confirm('¿Borrar todo el historial?')) return;
-    const token = getToken();
     await fetch(`${API_BASE}/chat/history`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${getToken()}` },
     });
     setMessages([]);
   };
 
-  // ── Render ──────────────────────────────────────────────────────────────
-
+  // ── Render ────────────────────────────────────────────────────────────────
   if (loading) {
     return <div className={styles.centered}><div className={styles.spinner} /></div>;
   }
 
   return (
     <div className={styles.wrapper}>
-      {/* Messages */}
       <div className={styles.messages}>
+
         {messages.length === 0 && !streaming && (
           <div className={styles.empty}>
             <p className={styles.emptyTitle}>Kai está listo</p>
@@ -236,20 +196,15 @@ export default function Chat() {
 
         {messages.length > 0 && (
           <div className={styles.clearRow}>
-            <button className={styles.clearBtn} onClick={clearHistory}>
-              Limpiar historial
-            </button>
+            <button className={styles.clearBtn} onClick={clearHistory}>Limpiar historial</button>
           </div>
         )}
 
         {messages.map(msg => <Message key={msg.id} msg={msg} />)}
 
-        {streaming && !streamingText && <TypingIndicator />}
-        {streaming && streamingText && (
-          <Message
-            msg={{ role: 'assistant', content: streamingText, created_at: null }}
-            isStreaming
-          />
+        {streaming && !streamText && <TypingIndicator />}
+        {streaming && streamText && (
+          <Message msg={{ role: 'assistant', content: streamText, created_at: null }} isStreaming />
         )}
 
         {error && (
@@ -261,7 +216,6 @@ export default function Chat() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
       <div className={styles.inputArea}>
         <textarea
           ref={inputRef}
@@ -274,32 +228,16 @@ export default function Chat() {
         />
         <button
           className={styles.sendBtn}
+          onPointerDown={(e) => e.preventDefault()}
           onClick={sendMessage}
           disabled={!input.trim()}
-          style={{ position: 'relative' }}
+          aria-label="Enviar"
         >
-          →
-          {queueLength > 0 && (
-            <span style={{
-              position: 'absolute',
-              top: '-4px',
-              right: '-4px',
-              width: '20px',
-              height: '20px',
-              borderRadius: '50%',
-              background: 'var(--accent)',
-              color: '#000',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '2px solid var(--bg-surface)',
-              fontWeight: 'bold'
-            }}>
-              {queueLength}
-            </span>
-          )}
+          {/* Siempre muestra la flecha — el indicador de proceso está en el chat */}
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
+          {pending > 0 && <span className={styles.pendingBadge}>{pending}</span>}
         </button>
       </div>
     </div>
