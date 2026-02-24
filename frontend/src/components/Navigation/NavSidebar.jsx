@@ -1,6 +1,6 @@
-import { useContext } from 'react';
+import { useContext, useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Monitor, MessageSquare, CheckSquare, Activity, Brain, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Monitor, MessageSquare, CheckSquare, Activity, Brain, Lock, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { AgentContext } from '../../context/AgentContext';
 import styles from './NavSidebar.module.css';
 
@@ -14,7 +14,20 @@ const NAV_ITEMS = [
 ];
 
 export default function NavSidebar({ collapsed, onToggle }) {
-  const { agentId, setAgent, agents } = useContext(AgentContext);
+  const { agentId, agentName, setAgent, agents } = useContext(AgentContext);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
@@ -44,20 +57,40 @@ export default function NavSidebar({ collapsed, onToggle }) {
         </button>
       </div>
 
-      {/* Mode switcher */}
-      {!collapsed && (
-        <div className={styles.modeSwitcher}>
-          {agents.map((agent) => (
-            <button
-              key={agent.id}
-              className={`${styles.modeBtn} ${agentId === agent.id ? styles.modeActive : ''}`}
-              onClick={() => setAgent(agent.id)}
-            >
-              {agent.name}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Mode dropdown */}
+      <div
+        className={`${styles.modeSection} ${collapsed ? styles.modeSectionCollapsed : ''}`}
+        ref={dropdownRef}
+      >
+        <button
+          className={styles.modeDropdownTrigger}
+          onClick={() => setDropdownOpen(o => !o)}
+          title={collapsed ? `Modo: ${agentName}` : undefined}
+        >
+          {collapsed ? (
+            <span className={styles.modeTagCollapsed}>{agentName.slice(0, 2)}</span>
+          ) : (
+            <>
+              <span className={styles.modeLabel}>{agentName}</span>
+              <ChevronDown size={14} className={`${styles.modeChevron} ${dropdownOpen ? styles.modeChevronOpen : ''}`} />
+            </>
+          )}
+        </button>
+
+        {dropdownOpen && (
+          <div className={`${styles.modeDropdown} ${collapsed ? styles.modeDropdownCollapsed : ''}`}>
+            {agents.map((agent) => (
+              <button
+                key={agent.id}
+                className={`${styles.modeOption} ${agentId === agent.id ? styles.modeOptionActive : ''}`}
+                onClick={() => { setAgent(agent.id); setDropdownOpen(false); }}
+              >
+                {agent.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <nav className={styles.nav}>
         {NAV_ITEMS.map(({ to, icon: Icon, label }) => (

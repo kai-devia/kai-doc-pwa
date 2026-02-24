@@ -91,36 +91,115 @@
   gap: 2px;
 }
 
-/* Mode switcher (CORE / PO) */
-.modeSwitcher {
-  display: flex;
-  gap: 6px;
-  padding: 10px 12px;
+/* Mode dropdown */
+.modeSection {
+  position: relative;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--border);
 }
 
-.modeBtn {
-  flex: 1;
-  padding: 5px 0;
+.modeSectionCollapsed {
+  padding: 8px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.modeDropdownTrigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
   background: none;
   border: 1px solid var(--border);
   border-radius: 6px;
   color: var(--text-secondary);
   font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   cursor: pointer;
   transition: color var(--transition), background var(--transition), border-color var(--transition);
 }
 
-.modeBtn:hover {
+.modeDropdownTrigger:hover {
   color: var(--text-primary);
   border-color: var(--text-secondary);
+  background: var(--bg-card);
 }
 
-.modeBtn.modeActive {
+.modeLabel {
   color: var(--accent);
-  border-color: var(--accent);
+}
+
+.modeChevron {
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.modeChevronOpen {
+  transform: rotate(180deg);
+}
+
+/* Collapsed: small 2-letter badge */
+.modeTagCollapsed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 26px;
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  cursor: pointer;
+}
+
+/* Dropdown panel */
+.modeDropdown {
+  position: absolute;
+  top: calc(100% - 4px);
+  left: 12px;
+  right: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.modeDropdownCollapsed {
+  left: 4px;
+  right: auto;
+  width: 110px;
+}
+
+.modeOption {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition);
+}
+
+.modeOption:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.modeOption.modeOptionActive {
+  color: var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
