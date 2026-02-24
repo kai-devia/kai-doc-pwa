@@ -39,8 +39,8 @@ export default function NavSidebar({ collapsed, onToggle }) {
           aria-label="Toggle navigation"
         >
           <img src="/kai-avatar.svg" alt="KAI" width="26" height="26" className={styles.logo} />
+          {!collapsed && <span className={styles.logoText}>Kai</span>}
         </button>
-        {!collapsed && <span className={styles.logoText}>Kai</span>}
       </div>
 
       {/* Mode selector — div with onclick, no box */}

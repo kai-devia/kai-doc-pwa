@@ -24,7 +24,7 @@
   overflow: hidden;
 }
 
-/* K logo button — same size always */
+/* K logo button — collapsed: 70px centrado / expanded: full width */
 .logoBtn {
   display: flex;
   align-items: center;
@@ -36,10 +36,17 @@
   border: none;
   cursor: pointer;
   transition: background var(--transition);
+  gap: 10px;
 }
 
 .logoBtn:hover {
   background: var(--bg-card);
+}
+
+.sidebar:not(.collapsed) .logoBtn {
+  width: 100%;
+  justify-content: flex-start;
+  padding-left: 22px;
 }
 
 .logo {
