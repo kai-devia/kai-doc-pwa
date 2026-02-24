@@ -18,6 +18,12 @@ export function AgentContextProvider({ children }) {
     }
   }, []);
 
+  // Apply data-mode to <html> whenever agentId changes (drives CSS theme)
+  useEffect(() => {
+    const agent = AGENTS.find(a => a.id === agentId) || AGENTS[0];
+    document.documentElement.setAttribute('data-mode', agent.name);
+  }, [agentId]);
+
   // Save to localStorage whenever agentId changes
   const setAgent = (newAgentId) => {
     if (AGENTS.some(a => a.id === newAgentId)) {
