@@ -66,14 +66,12 @@ function applyAccent(hex) {
   root.style.setProperty('--accent-hover', darken(hex));
   root.style.setProperty('--accent-rgb', hexToRgb(hex));
 
-  // Derive subtle background tints from the accent hue
-  const [h, s] = hexToHsl(hex);
-  // Very dark tinted backgrounds — same structure as CSS :root but hue-matched
-  root.style.setProperty('--bg-base',    hslToHex(h, Math.min(s, 30), 5));
-  root.style.setProperty('--bg-surface', hslToHex(h, Math.min(s, 25), 9));
-  root.style.setProperty('--bg-sidebar', hslToHex(h, Math.min(s, 20), 7));
-  root.style.setProperty('--bg-card',    hslToHex(h, Math.min(s, 20), 11));
-  root.style.setProperty('--border',     hslToHex(h, Math.min(s, 20), 18));
+  // Reset backgrounds to neutral — no color tinting on surfaces
+  root.style.removeProperty('--bg-base');
+  root.style.removeProperty('--bg-surface');
+  root.style.removeProperty('--bg-sidebar');
+  root.style.removeProperty('--bg-card');
+  root.style.removeProperty('--border');
 }
 
 export function AgentContextProvider({ children }) {
