@@ -75,6 +75,11 @@ export function AgentContextProvider({ children }) {
       localStorage.setItem('kai-mode-colors', JSON.stringify(next));
       return next;
     });
+    // Apply immediately if it's the active mode — don't wait for useEffect
+    const currentAgent = AGENTS.find(a => a.id === agentId);
+    if (currentAgent && currentAgent.name === modeName) {
+      applyAccent(color);
+    }
   };
 
   const agent = AGENTS.find(a => a.id === agentId) || AGENTS[0];

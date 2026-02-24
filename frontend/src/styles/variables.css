@@ -22,13 +22,11 @@
 }
 
 /* ─── PO Mode ─────────────────────────────────────────────────────── */
+/* --accent, --accent-hover, --accent-rgb are managed dynamically by AgentContext */
 [data-mode="PO"] {
   --bg-base: #0e0b07;
   --bg-surface: #1a1508;
   --bg-sidebar: #13100a;
   --bg-card: #1e1810;
-  --accent: #f59e0b;
-  --accent-hover: #d97706;
-  --accent-rgb: 245, 158, 11;
   --border: #2e2618;
 }
