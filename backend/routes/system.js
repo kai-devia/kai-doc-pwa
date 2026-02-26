@@ -849,15 +849,205 @@ router.post('/capability-action', (req, res) => {
     });
   }
   
-  // TODO: Execute the actual action based on capability + action + payload
-  // For now, just return success (implementation pending)
-  res.json({ 
-    ok: true, 
-    agentId, 
-    capability, 
-    action,
-    message: 'Action permitted (execution not yet implemented)'
-  });
+  // Execute the action based on capability + action + payload
+  try {
+    switch (capability) {
+      case 'mail': {
+        if (action !== 'send') {
+          return res.status(400).json({ error: `Mail action '${action}' not supported. Use 'send'.` });
+        }
+        
+        const { to, subject, body } = payload || {};
+        if (!to || !subject) {
+          return res.status(400).json({ error: 'Mail requires: to, subject (body optional)' });
+        }
+        
+        // Format subject with agent prefix: KAI CORE - Subject
+        const agentLabel = agentId.toUpperCase();
+        const fullSubject = `KAI ${agentLabel} - ${subject}`;
+        const mailBody = body || '(sin contenido)';
+        
+        // Build email with proper headers
+        const email = [
+          `To: ${to}`,
+          `Subject: ${fullSubject}`,
+          `From: kai.live.dev@gmail.com`,
+          `Content-Type: text/plain; charset=utf-8`,
+          '',
+          mailBody
+        ].join('\n');
+        
+        // Send via msmtp using temp file (avoids shell escaping issues)
+        const { execSync } = require('child_process');
+        const fs = require('fs');
+        const os = require('os');
+        const path = require('path');
+        
+        const tmpFile = path.join(os.tmpdir(), `kai-mail-${Date.now()}.txt`);
+        fs.writeFileSync(tmpFile, email, 'utf8');
+        
+        try {
+          execSync(`msmtp -a gmail "${to}" < "${tmpFile}"`, {
+            timeout: 30000,
+            shell: '/bin/bash'
+          });
+        } finally {
+          fs.unlinkSync(tmpFile); // Clean up
+        }
+        
+        console.log(`[MAIL] Sent from ${agentId}: "${fullSubject}" -> ${to}`);
+        
+        return res.json({ 
+          ok: true, 
+          agentId, 
+          capability,
+          action,
+          details: { to, subject: fullSubject }
+        });
+      }
+      
+      case 'github': {
+        const { execSync } = require('child_process');
+        const { repo, message, branch, files } = payload || {};
+        
+        // Validate repo path exists
+        if (!repo) {
+          return res.status(400).json({ error: 'GitHub requires: repo (path to repository)' });
+        }
+        
+        // Security: only allow repos under /home/kai
+        const repoPath = repo.startsWith('/') ? repo : `/home/kai/projects/${repo}`;
+        if (!repoPath.startsWith('/home/kai/')) {
+          return res.status(403).json({ error: 'Repository must be under /home/kai/' });
+        }
+        
+        // Check repo exists
+        const fs = require('fs');
+        if (!fs.existsSync(repoPath)) {
+          return res.status(404).json({ error: `Repository not found: ${repoPath}` });
+        }
+        
+        const agentLabel = agentId.toUpperCase();
+        const gitEnv = {
+          GIT_SSH_COMMAND: 'ssh -i /home/kai/.ssh/github_kai -o StrictHostKeyChecking=no'
+        };
+        const execOpts = { 
+          cwd: repoPath, 
+          timeout: 60000, 
+          encoding: 'utf8',
+          env: { ...process.env, ...gitEnv }
+        };
+        
+        let result = {};
+        
+        switch (action) {
+          case 'status': {
+            const status = execSync('git status --porcelain', execOpts).trim();
+            const branch = execSync('git branch --show-current', execOpts).trim();
+            result = { branch, changes: status.split('\n').filter(Boolean) };
+            break;
+          }
+          
+          case 'commit': {
+            if (!message) {
+              return res.status(400).json({ error: 'Commit requires: message' });
+            }
+            const commitMsg = `[${agentLabel}] ${message}`;
+            
+            // Add files (specific or all)
+            if (files && Array.isArray(files)) {
+              for (const f of files) {
+                execSync(`git add "${f}"`, execOpts);
+              }
+            } else {
+              execSync('git add -A', execOpts);
+            }
+            
+            const commitOut = execSync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, execOpts);
+            console.log(`[GITHUB] Commit from ${agentId} in ${repoPath}: "${commitMsg}"`);
+            result = { committed: true, message: commitMsg };
+            break;
+          }
+          
+          case 'push': {
+            const targetBranch = branch || 'main';
+            const pushOut = execSync(`git push origin ${targetBranch}`, execOpts);
+            console.log(`[GITHUB] Push from ${agentId} in ${repoPath} to ${targetBranch}`);
+            result = { pushed: true, branch: targetBranch };
+            break;
+          }
+          
+          case 'commit-push': {
+            if (!message) {
+              return res.status(400).json({ error: 'Commit-push requires: message' });
+            }
+            const commitMsg = `[${agentLabel}] ${message}`;
+            const targetBranch = branch || 'main';
+            
+            // Add files
+            if (files && Array.isArray(files)) {
+              for (const f of files) {
+                execSync(`git add "${f}"`, execOpts);
+              }
+            } else {
+              execSync('git add -A', execOpts);
+            }
+            
+            // Commit
+            execSync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, execOpts);
+            
+            // Push
+            execSync(`git push origin ${targetBranch}`, execOpts);
+            
+            console.log(`[GITHUB] Commit+Push from ${agentId} in ${repoPath}: "${commitMsg}" -> ${targetBranch}`);
+            result = { committed: true, pushed: true, message: commitMsg, branch: targetBranch };
+            break;
+          }
+          
+          case 'pull': {
+            const targetBranch = branch || 'main';
+            execSync(`git pull origin ${targetBranch}`, execOpts);
+            console.log(`[GITHUB] Pull from ${agentId} in ${repoPath} from ${targetBranch}`);
+            result = { pulled: true, branch: targetBranch };
+            break;
+          }
+          
+          case 'clone': {
+            const { url, dest } = payload || {};
+            if (!url) {
+              return res.status(400).json({ error: 'Clone requires: url' });
+            }
+            const destPath = dest || `/home/kai/projects/${url.split('/').pop().replace('.git', '')}`;
+            execSync(`git clone "${url}" "${destPath}"`, { ...execOpts, cwd: '/home/kai/projects' });
+            console.log(`[GITHUB] Clone from ${agentId}: ${url} -> ${destPath}`);
+            result = { cloned: true, path: destPath };
+            break;
+          }
+          
+          default:
+            return res.status(400).json({ 
+              error: `GitHub action '${action}' not supported. Use: status, commit, push, commit-push, pull, clone` 
+            });
+        }
+        
+        return res.json({ ok: true, agentId, capability, action, details: result });
+      }
+      
+      case 'jira':
+      case 'telegram':
+      case 'slack':
+        return res.status(501).json({ 
+          error: `Capability '${capability}' action '${action}' not implemented yet`,
+          code: 'NOT_IMPLEMENTED'
+        });
+      
+      default:
+        return res.status(400).json({ error: `Unknown capability: ${capability}` });
+    }
+  } catch (err) {
+    console.error(`[CAPABILITY ERROR] ${capability}/${action}:`, err.message);
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
