@@ -1264,6 +1264,12 @@
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+.capabilityToggling {
+  opacity: 0.5;
+  cursor: wait;
+  pointer-events: none;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════ */
 /* Agent Card Redesign v2                                                      */
 /* ══════════════════════════════════════════════════════════════════════════ */
@@ -1439,6 +1445,12 @@
 .capabilityDisabled:hover {
   color: #666;
   background: rgba(255, 255, 255, 0.05);
+}
+
+.capabilityToggling {
+  opacity: 0.5;
+  cursor: wait;
+  pointer-events: none;
 }
 
 /* Actions */

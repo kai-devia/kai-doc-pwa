@@ -307,7 +307,7 @@ function AgentCard({
   onForceReset, forceResetting,
   onRestartClick, restarting, pendingRestart,
   onTogglePower, togglingPower,
-  capabilities, onToggleCapability,
+  capabilities, onToggleCapability, togglingCapability,
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const colorInputRef = useRef(null);
@@ -410,11 +410,13 @@ function AgentCard({
         <div className={styles.capabilitiesRow}>
           {Object.entries(CAPABILITY_ICONS).map(([cap, Icon]) => {
             const isEnabled = capabilities?.[cap] ?? false;
+            const isToggling = togglingCapability === `${agent.id}:${cap}`;
             return (
               <button
                 key={cap}
-                className={`${styles.capabilityBtn} ${isEnabled ? styles.capabilityEnabled : styles.capabilityDisabled}`}
-                onClick={() => onToggleCapability?.(agent.id, cap, isEnabled)}
+                className={`${styles.capabilityBtn} ${isEnabled ? styles.capabilityEnabled : styles.capabilityDisabled} ${isToggling ? styles.capabilityToggling : ''}`}
+                onClick={() => !isToggling && onToggleCapability?.(agent.id, cap, isEnabled)}
+                disabled={isToggling}
                 title={`${CAPABILITY_LABELS[cap]}: ${isEnabled ? 'Activado' : 'Desactivado'}`}
               >
                 <Icon size={14} className={styles.capabilityIcon} />
@@ -501,6 +503,7 @@ export default function Sistema() {
   const [restarting, setRestarting] = useState(false);
   const [pendingRestart, setPendingRestart] = useState(null); // agentId or null
   const [togglingPower, setTogglingPower] = useState(null); // agentId or null
+  const [togglingCapability, setTogglingCapability] = useState(null); // '{agentId}:{capability}' or null
   const restartConfirmTimeout = useRef(null);
   const colorDebounceRef = useRef({});
 
@@ -763,6 +766,8 @@ export default function Sistema() {
 
   // Toggle capability for an agent
   const handleToggleCapability = async (agentId, capability, currentEnabled) => {
+    const key = `${agentId}:${capability}`;
+    setTogglingCapability(key);
     try {
       const res = await fetch(`${API_BASE}/system/agent-capabilities/${agentId}/${capability}`, {
         method: 'PUT',
@@ -770,20 +775,31 @@ export default function Sistema() {
         body: JSON.stringify({ enabled: !currentEnabled }),
       });
       if (res.ok) {
-        // Optimistic update
-        setAgentCapabilities(prev => ({
-          ...prev,
-          capabilities: {
-            ...prev.capabilities,
-            [agentId]: {
-              ...prev.capabilities?.[agentId],
-              [capability]: !currentEnabled,
+        // Update React state + cache so remounts don't use stale value
+        setAgentCapabilities(prev => {
+          const updated = {
+            ...prev,
+            capabilities: {
+              ...prev.capabilities,
+              [agentId]: {
+                ...prev.capabilities?.[agentId],
+                [capability]: !currentEnabled,
+              }
             }
-          }
-        }));
+          };
+          _cache.agentCapabilities = updated; // keep cache in sync
+          return updated;
+        });
+        // Also re-fetch to confirm server state matches UI
+        fetchAll();
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        console.error('Toggle capability failed:', res.status, errData);
       }
     } catch (err) {
       console.error('Toggle capability error:', err);
+    } finally {
+      setTogglingCapability(null);
     }
   };
 
@@ -964,6 +980,7 @@ export default function Sistema() {
               togglingPower={togglingPower}
               capabilities={agentCapabilities?.capabilities?.[agent.id]}
               onToggleCapability={handleToggleCapability}
+              togglingCapability={togglingCapability}
             />
           ))}
         </div>
