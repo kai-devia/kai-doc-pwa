@@ -4,13 +4,21 @@ export const AgentContext = createContext();
 
 const ALL_AGENTS = [
   { id: 'kai',    name: 'CORE', statusKey: 'core' },
-  { id: 'po-kai', name: 'PO',   statusKey: 'po' },
+  { id: 'po-kai', name: 'PO',   statusKey: 'po'   },
+  { id: 'fe-kai', name: 'FE',   statusKey: 'fe'   },
+  { id: 'be-kai', name: 'BE',   statusKey: 'be'   },
+  { id: 'ux-kai', name: 'UX',   statusKey: 'ux'   },
+  { id: 'qa-kai', name: 'QA',   statusKey: 'qa'   },
 ];
 
 // Fallback colors — solo si el backend no responde
 const DEFAULT_COLORS = {
   CORE: '#00d4aa',
   PO:   '#f59e0b',
+  FE:   '#3b82f6',
+  BE:   '#8b5cf6',
+  UX:   '#ec4899',
+  QA:   '#10b981',
 };
 
 function hexToRgb(hex) {

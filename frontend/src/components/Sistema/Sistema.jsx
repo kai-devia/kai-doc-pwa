@@ -206,12 +206,12 @@ function ProfileCard({ profile, data, isActive, onSelect, switching }) {
 // ── Agent definitions ──────────────────────────────────────────────────────
 // Maps PWA agent IDs to display config. agentConfigId is the id used by bridge/Docker
 const AGENTS = [
-  { id: 'core', agentConfigId: 'core', name: 'CORE', description: 'Agente principal', emoji: '🧠' },
-  { id: 'po', agentConfigId: 'po', name: 'PO', description: 'Product Owner', emoji: '📋' },
-  { id: 'fe', agentConfigId: null, name: 'FE', description: 'Frontend Developer', emoji: '🎨' },
-  { id: 'be', agentConfigId: null, name: 'BE', description: 'Backend Developer', emoji: '⚙️' },
-  { id: 'ux', agentConfigId: null, name: 'UX', description: 'UX Designer', emoji: '✨' },
-  { id: 'qa', agentConfigId: null, name: 'QA', description: 'Quality Assurance', emoji: '🔍' },
+  { id: 'core', agentConfigId: 'core', name: 'CORE', description: 'Agente principal',     emoji: '🧠' },
+  { id: 'po',   agentConfigId: 'po',   name: 'PO',   description: 'Product Owner',        emoji: '📋' },
+  { id: 'fe',   agentConfigId: 'fe',   name: 'FE',   description: 'Frontend Developer',   emoji: '🎨' },
+  { id: 'be',   agentConfigId: 'be',   name: 'BE',   description: 'Backend Developer',    emoji: '⚙️' },
+  { id: 'ux',   agentConfigId: 'ux',   name: 'UX',   description: 'UX Designer',          emoji: '🖌️' },
+  { id: 'qa',   agentConfigId: 'qa',   name: 'QA',   description: 'Quality Assurance',    emoji: '🔍' },
 ];
 
 const MODEL_OPTIONS = [

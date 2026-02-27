@@ -567,7 +567,10 @@ const AGENT_STATUS_DEFAULTS = {
 const AGENT_CONTAINERS = {
   core: 'agent-core',
   po:   'agent-po',
-  // fe, be, ux, qa se añadirán cuando existan
+  fe:   'agent-fe',
+  be:   'agent-be',
+  ux:   'agent-ux',
+  qa:   'agent-qa',
 };
 
 // Verificar estado real de un contenedor Docker

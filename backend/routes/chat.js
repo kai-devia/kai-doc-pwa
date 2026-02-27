@@ -30,6 +30,26 @@ const AGENT_CONFIG = {
     agentId: 'po',
     token: process.env.OPENCLAW_PO_TOKEN || process.env.OPENCLAW_GATEWAY_TOKEN
   },
+  'fe-kai': {
+    port: parseInt(process.env.OPENCLAW_FE_PORT || '18796'),
+    agentId: 'fe',
+    token: process.env.OPENCLAW_FE_TOKEN || process.env.OPENCLAW_GATEWAY_TOKEN
+  },
+  'be-kai': {
+    port: parseInt(process.env.OPENCLAW_BE_PORT || '18793'),
+    agentId: 'be',
+    token: process.env.OPENCLAW_BE_TOKEN || process.env.OPENCLAW_GATEWAY_TOKEN
+  },
+  'ux-kai': {
+    port: parseInt(process.env.OPENCLAW_UX_PORT || '18794'),
+    agentId: 'ux',
+    token: process.env.OPENCLAW_UX_TOKEN || process.env.OPENCLAW_GATEWAY_TOKEN
+  },
+  'qa-kai': {
+    port: parseInt(process.env.OPENCLAW_QA_PORT || '18795'),
+    agentId: 'qa',
+    token: process.env.OPENCLAW_QA_TOKEN || process.env.OPENCLAW_GATEWAY_TOKEN
+  },
 };
 const SESSION_USER   = 'kai-doc-pwa'; // stable session key via OpenClaw user field
 const WHISPER_HOST = process.env.WHISPER_HOST || '172.19.0.1';

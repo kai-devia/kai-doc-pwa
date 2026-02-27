@@ -1,7 +1,7 @@
 const express = require('express');
 const { authMiddleware } = require('../middlewares/auth');
 const { getFileTree, getFileContent, writeFileContent, flattenTree, createFile, createDir, deleteItem, renameItem, readOrder, writeOrder } = require('../services/fileService');
-const { workspacePOKai, workspaceRoot, projectsRoot } = require('../config/env');
+const { workspacePOKai, workspaceFEKai, workspaceBEKai, workspaceUXKai, workspaceQAKai, workspaceRoot, projectsRoot } = require('../config/env');
 
 const router = express.Router();
 
@@ -11,6 +11,10 @@ router.use(authMiddleware);
 // Helper to get the correct workspace root based on agentId
 function getWorkspaceRoot(agentId) {
   if (agentId === 'po-kai')   return workspacePOKai;
+  if (agentId === 'fe-kai')   return workspaceFEKai;
+  if (agentId === 'be-kai')   return workspaceBEKai;
+  if (agentId === 'ux-kai')   return workspaceUXKai;
+  if (agentId === 'qa-kai')   return workspaceQAKai;
   if (agentId === 'projects') return projectsRoot;
   return workspaceRoot;
 }
