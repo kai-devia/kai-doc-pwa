@@ -21,6 +21,6 @@
 
 @media (max-width: 768px) {
   .content {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0));
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 }
