@@ -1,16 +1,17 @@
 import { useContext, useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Monitor, MessageSquare, CheckSquare, Activity, Brain, Lock } from 'lucide-react';
+import { Monitor, MessageSquare, CheckSquare, Activity, Brain, Lock, FolderOpen } from 'lucide-react';
 import { AgentContext } from '../../context/AgentContext';
 import styles from './NavSidebar.module.css';
 
 const NAV_ITEMS = [
-  { to: '/sistema', icon: Monitor,       label: 'Sistema', onlyFor: ['CORE'] },
-  { to: '/chat',    icon: MessageSquare, label: 'Chat' },
-  { to: '/tasks',   icon: CheckSquare,   label: 'Tasks' },
-  { to: '/pulse',   icon: Activity,      label: 'Pulse' },
-  { to: '/mente',   icon: Brain,         label: 'Mente' },
-  { to: '/vault',   icon: Lock,          label: 'Vault' },
+  { to: '/sistema',   icon: Monitor,       label: 'Sistema',   onlyFor: ['CORE'] },
+  { to: '/chat',      icon: MessageSquare, label: 'Chat' },
+  { to: '/tasks',     icon: CheckSquare,   label: 'Tasks' },
+  { to: '/pulse',     icon: Activity,      label: 'Pulse' },
+  { to: '/mente',     icon: Brain,         label: 'Mente' },
+  { to: '/proyectos', icon: FolderOpen,    label: 'Proyectos' },
+  { to: '/vault',     icon: Lock,          label: 'Vault' },
 ];
 
 export default function NavSidebar({ collapsed, onToggle }) {

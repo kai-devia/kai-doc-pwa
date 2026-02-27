@@ -22,6 +22,7 @@ module.exports = {
   port: parseInt(process.env.PORT, 10) || 3001,
   workspaceRoot: process.env.WORKSPACE_ROOT,
   workspacePOKai: process.env.WORKSPACE_PO_KAI || '/home/kai/.openclaw/workspace-po-kai',
+  projectsRoot: process.env.PROJECTS_ROOT || '/home/kai/.kai-shared/projects',
   jwtExpiry: '365d',
   telegramBotToken: process.env.TELEGRAM_BOT_TOKEN,
   telegramChatId: process.env.TELEGRAM_CHAT_ID || '8314284665',

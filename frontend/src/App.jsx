@@ -10,6 +10,7 @@ import Chat from './components/Chat/Chat';
 import Tasks from './components/Tasks/Tasks';
 import Pulse from './components/Pulse/Pulse';
 import Mente from './components/Mente/Mente';
+import Proyectos from './components/Proyectos/Proyectos';
 import Vault from './components/Vault/Vault';
 
 // File viewer / editor (used inside Mente with nested routes)
@@ -89,6 +90,13 @@ export default function App() {
 
         {/* 🧠 Mente — file tree + markdown viewer + editor */}
         <Route path="mente" element={<Mente />}>
+          <Route index element={<Dashboard />} />
+          <Route path="file/*" element={<MarkdownView />} />
+          <Route path="edit/*" element={<Editor />} />
+        </Route>
+
+        {/* 📁 Proyectos — shared projects across all agents */}
+        <Route path="proyectos" element={<Proyectos />}>
           <Route index element={<Dashboard />} />
           <Route path="file/*" element={<MarkdownView />} />
           <Route path="edit/*" element={<Editor />} />
